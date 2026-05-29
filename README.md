@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/banner.png" alt="Project Banner" width="640">
+  <img src="https://github.com/Hyph-M/tauri-plugin-snap-layout/blob/main/assets/banner.png" alt="Project Banner" width="640">
 </p>
 
 # tauri-plugin-snap-layout
@@ -8,7 +8,7 @@
   <tr>
     <!-- Left Column: The GIF (Takes up 40% of the width) -->
     <td width="40%" valign="center" align="center">
-      <img src="assets/demo.gif" alt="App Demo" width="100%">
+      <img src="https://github.com/Hyph-M/tauri-plugin-snap-layout/blob/main/assets/demo.gif" alt="App Demo" width="100%">
     </td>
     <td width="60%" valign="top">
       <h3>Windows 11 Snap Layout integration for Tauri v2 frameless windows.</h3>
