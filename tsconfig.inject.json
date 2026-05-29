@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "es2021",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "skipLibCheck": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "declaration": false,
+    "declarationDir": null
+  },
+  "include": ["guest-js/inject.ts"],
+  "exclude": ["dist-js", "node_modules"]
+}

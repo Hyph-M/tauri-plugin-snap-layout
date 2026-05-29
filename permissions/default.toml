@@ -1,0 +1,11 @@
+"$schema" = "schemas/schema.json"
+plugin_name = "snap-layout"
+
+[default]
+description = "Default permissions for the snap-layout plugin"
+permissions = ["allow-update-snap-bounds"]
+
+[[permission]]
+identifier = "allow-update-snap-bounds"
+description = "Allows the frontend to update window snapping hitboxes"
+commands.allow = ["update_snap_bounds"]
