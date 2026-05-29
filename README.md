@@ -34,7 +34,7 @@ Add the Rust crate to your Tauri app:
 ```toml
 # src-tauri/Cargo.toml
 [dependencies]
-tauri-plugin-snap-layout = "1.0.0"
+tauri-plugin-snap-layout = "1"
 ```
 
 Add the JS/TS bindings to your frontend:
