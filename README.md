@@ -65,6 +65,19 @@ pub fn run() {
 }
 ```
 
+Set decorations to false in your `src-tauri/tauri.conf.json` file. This is done in the "windows" section.
+
+```json
+"app": {
+    "windows": [
+      {
+        "decorations": false
+      }
+    ],
+  },
+```
+
+
 ### 2. Frontend — Add the button
 
 Give your maximize/snap button the ID you configured in Rust:
