@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/Hyph-M/tauri-plugin-snap-layout/blob/main/assets/banner.png" alt="Project Banner" width="640">
+  <img src="https://raw.githubusercontent.com/Hyph-M/tauri-plugin-snap-layout/main/assets/banner.png" alt="Project Banner" width="640">
 </p>
 
 # tauri-plugin-snap-layout
@@ -8,7 +8,7 @@
   <tr>
     <!-- Left Column: The GIF (Takes up 40% of the width) -->
     <td width="40%" valign="center" align="center">
-      <img src="https://github.com/Hyph-M/tauri-plugin-snap-layout/blob/main/assets/demo.gif" alt="App Demo" width="100%">
+      <img src="https://raw.githubusercontent.com/Hyph-M/tauri-plugin-snap-layout/main/assets/demo.gif" alt="App Demo" width="100%">
     </td>
     <td width="60%" valign="top">
       <h3>Windows 11 Snap Layout integration for Tauri v2 frameless windows.</h3>
@@ -43,11 +43,13 @@ Add the JS/TS bindings to your frontend:
 npm install tauri-plugin-snap-layout
 # or
 pnpm add tauri-plugin-snap-layout
+# or your preferred package manager
 ```
+
 
 ## Usage
 
-### 1. Rust — Register the plugin
+### 1. Rust — Register the plugin and prepare required options.
 
 Register the plugin in your `src-tauri/src/lib.rs` file:
 
@@ -77,10 +79,18 @@ Set decorations to false in your `src-tauri/tauri.conf.json` file. This is done 
   },
 ```
 
+Add this permission to your src-tauri/capabilities/default.json.
+
+```json
+{
+  "permissions": ["snap-layout:default"]
+}
+```
+
 
 ### 2. Frontend — Add the button
 
-Give your maximize/snap button the ID you configured in Rust:
+Give your maximize/snap button the ID you configured in the rust setup stage:
 
 ```html
 <button id="snap-btn">Max</button>
@@ -100,6 +110,7 @@ changeSnapTarget needs an existing ID to transfer to and will automatically upda
 
 changePadding will add or remove the area of the hover zone. If using negative padding it will have a minimum width/height of 1px. If this negative padding extends past the bounds of the button it will continue to move the hover area rather than stop at the bounds of the button.
 The padding applied is additive, so the below will result in 5 padding on the left, and 3 on all other sides.
+The options available are left, right, top, bottom, all.
 
 ```typescript
 changePadding( {left: 2, right: 0, top: 0, bottom: 0, all:3} )
@@ -109,8 +120,10 @@ If you need to call it from outside a module context (vanilla JS, inline scripts
 
 ```typescript
 window.changeSnapTarget("new-button-id");
-window.changePadding( {left: 0} )
+window.changePadding( { } )
 ```
+
+The same fields apply to changePadding as above.
 
 ### Optional Configuration
 
@@ -140,16 +153,6 @@ Because the native overlay intercepts pointer events, `:hover` CSS will not fire
 #snap-btn:hover,
 #snap-btn.is-hovered {
   background: rgba(255, 255, 255, 0.1);
-}
-```
-
-### Permissions (Tauri v2)
-
-If your app uses Tauri v2's strict permission system, ensure your app's capabilities allow the plugin to update bounds:
-
-```json
-{
-  "permissions": ["snap-layout:default"]
 }
 ```
 
