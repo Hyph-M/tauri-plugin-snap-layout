@@ -30,6 +30,7 @@ pub struct AreaBuilder {
     config: SnapConfig,
 }
 
+#[allow(clippy::too_many_arguments)]
 #[tauri::command]
 fn fallback_update_snap_bounds(
     _x: i32,

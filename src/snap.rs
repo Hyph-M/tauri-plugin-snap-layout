@@ -253,17 +253,14 @@ unsafe extern "system" fn child_subclass_proc(
                 return 0;
             }
         }
-        WM_SETCURSOR => {
-            if !state_ptr.is_null() {
-                let state = &*state_ptr;
-                let cursor_id = match state.cursor {
-                    SnapCursor::Hand => IDC_HAND,
-                    SnapCursor::Arrow => IDC_ARROW,
-                };
-                SetCursor(LoadCursorW(0 as _, cursor_id));
-
-                return 1;
-            }
+        WM_SETCURSOR if !state_ptr.is_null() => {
+            let state = &*state_ptr;
+            let cursor_id = match state.cursor {
+                SnapCursor::Hand => IDC_HAND,
+                SnapCursor::Arrow => IDC_ARROW,
+            };
+            SetCursor(LoadCursorW(0 as _, cursor_id));
+            return 1;
         }
         _ => {}
     }
