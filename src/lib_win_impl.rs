@@ -111,6 +111,10 @@ impl AreaBuilder {
         let version = windows_version::OsVersion::current();
         if version.build < 22000 {
             return Builder::new("snap-layout")
+                .setup(|app, _| {
+                    app.manage(Snap::new(app.clone()));
+                    Ok(())
+                })
                 .invoke_handler(tauri::generate_handler![fallback_update_snap_bounds])
                 .build();
         }

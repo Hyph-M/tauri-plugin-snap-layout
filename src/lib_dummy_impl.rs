@@ -1,34 +1,16 @@
 use crate::desktop::Snap;
 use tauri::{
     plugin::{Builder, TauriPlugin},
-    Manager, Runtime,
+    Manager, Runtime, WebviewWindow,
 };
 
 #[tauri::command]
-pub fn update_snap_bounds(
+pub fn update_snap_bounds<R: Runtime>(
+    _webview_window: WebviewWindow<R>,
     _x: i32,
     _y: i32,
     _width: i32,
     _height: i32,
-    _padding_left: i32,
-    _padding_right: i32,
-    _padding_top: i32,
-    _padding_bottom: i32,
-    _padding_all: i32,
-) {
-}
-
-#[tauri::command]
-fn fallback_update_snap_bounds(
-    _x: i32,
-    _y: i32,
-    _width: i32,
-    _height: i32,
-    _padding_left: i32,
-    _padding_right: i32,
-    _padding_top: i32,
-    _padding_buttom: i32,
-    _padding_all: i32,
 ) {
 }
 
@@ -54,7 +36,7 @@ impl AreaBuilder {
     pub fn padding_bottom(self, _: i32) -> Self {
         self
     }
-    pub fn padding_all(mut self, _: i32) -> Self {
+    pub fn padding_all(self, _: i32) -> Self {
         self
     }
     pub fn display(self, _: bool) -> Self {
