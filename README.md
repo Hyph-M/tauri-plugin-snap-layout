@@ -180,6 +180,10 @@ export default defineConfig({
 });
 ```
 
+## How it works
+
+The plugin creates an invisible native Win32 child `HWND` positioned over your button. This child window returns `HTMAXBUTTON` from `WM_NCHITTEST`, which is the correct native path for triggering Windows 11's Snap Layout popup on frameless and borderless windows — no keyboard simulation or input injection."
+
 ## Credits
 
 Inspired by and originally derived from:
