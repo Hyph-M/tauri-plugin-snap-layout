@@ -12,20 +12,24 @@
     </td>
     <td width="60%" valign="top">
       <h3>Windows 11 Snap Layout integration for Tauri v2 frameless windows.</h3>
-      <p>Overlays an invisible native Win32 child window over a frontend button so that hovering it triggers the OS Snap Layout popup natively, without requiring a native titlebar.</p>
+      <p>Places an invisible native Win32 overlay over your custom titlebar button so hovering it triggers the OS snap zones and snap assist popup — no native titlebar required. Maximize and restore are wired up automatically through the same overlay.</p>
       <p>Works transparently on non-Windows platforms — all APIs are present but do nothing, so your codebase stays cross-platform.</p>
+      <p>Having multiple windows with this plugin is supported.</p>
     </td>
   </tr>
 </table>
-Because of the nature of the overlay intercepting the mouse cursor, maximize/restore functionality is automatically attached to the area.
+
+<br></br>
 
 ## Platform Support
 
-| Platform      | Snap Layout | Mouse Events | Maximize Toggle | Notes                        |
-| ------------- | ----------- | ------------ | --------------- | ---------------------------- |
-| Windows 11    | ✅          | Intercepted  | ✅              | Full support (build ≥ 22000) |
-| Windows 10    | ❌          | Normal       | ❌              | Plugin loads, no-op          |
-| macOS / Linux | ❌          | Normal       | ❌              | No-op, compiles cleanly      |
+| Platform      | Snap Layout | Multi-Window | Toggle (Attach/Detach) | Notes                        |
+| ------------- | ----------- | ------------ | ---------------------- | ---------------------------- |
+| Windows 11    | ✅          | ✅ Full       | ✅ Native & Frontend   | Full support (build ≥ 22000) |
+| Windows 10    | ❌          | ❌ No-op     | ❌ Safe Fallback       | Plugin loads cleanly; all APIs callable, no effect |
+| macOS / Linux | ❌          | ❌ No-op     | ❌ Safe Fallback       | No-op, compiles cleanly      |
+
+<br></br>
 
 ## Installation
 
@@ -46,6 +50,7 @@ pnpm add tauri-plugin-snap-layout
 # or your preferred package manager
 ```
 
+<br></br>
 
 ## Usage
 
@@ -101,27 +106,47 @@ No initialisation required. The plugin self-initialises via the injected script 
 If you're using a bundler and have the package installed:
 
 ```typescript
-import { changePadding, changeSnapTarget } from "tauri-plugin-snap-layout";
-changeSnapTarget("new-button-id");
-changePadding( {left: 0} )
+import { changePadding, changeTarget, attach, detach, isAttached } from "tauri-plugin-snap-layout";
+
+// Swap targetted button dynamically
+changeTarget("new-button-id");
+
+// Temporarily remove the Snap Zone by destroying the overlay area.
+await detach();
+
+// Re-enable the snap area, you can set a new target here as well.
+attach("optional-new-target");
+
+// Change padding
+changePadding( {} );
+
+// Get attached state
+isAttached();
 ```
 
-changeSnapTarget needs an existing ID to transfer to and will automatically update bounds based on the target.
+`changeTarget` needs an existing ID to transfer to and will automatically update bounds based on the target.
 
-changePadding will add or remove the area of the hover zone. If using negative padding it will have a minimum width/height of 1px. If this negative padding extends past the bounds of the button it will continue to move the hover area rather than stop at the bounds of the button.
-The padding applied is additive, so the below will result in 5 padding on the left, and 3 on all other sides.
-The options available are left, right, top, bottom, all.
+`changePadding` will add or remove the area of the hover zone. If using negative padding it will have a minimum width/height of 1px. If this negative padding extends past the bounds of the button it will continue to move the hover area rather than stop at the bounds of the button.
+
+Padding fields are set, not accumulated — each call overwrites the previous passed fields. `all` acts as a baseline that can combine with per-side values at render time. The example below results in 5 on the left and 3 on all other sides.
 
 ```typescript
-changePadding( {left: 2, right: 0, top: 0, bottom: 0, all:3} )
+changePadding( {left: 2, right: 0, top: 0, bottom: 0, all:3} );
 ```
+
+The options available are left, right, top, bottom, all.
 
 If you need to call it from outside a module context (vanilla JS, inline scripts):
 
 ```typescript
-window.changeSnapTarget("new-button-id");
-window.changePadding( { } )
+window.changeTarget("new-button-id");
+window.changePadding( {} );
+window.detach();
+window.attach();
+window.isAttached();
 ```
+
+**Note:** `attach`, `detach`, and `isAttached` are common names that could conflict with other libraries. In complex apps, prefer the namespaced `window.__SNAP_LAYOUT_ATTACH__` variants instead.
 
 The same fields apply to changePadding as above.
 
@@ -156,20 +181,31 @@ Because the native overlay intercepts pointer events, `:hover` CSS will not fire
 }
 ```
 
-## Programmatic Detach (Rust only)
+### Programmatic Window Management & Multi-Window Support
 
-If you need to programmatically destroy the native Win32 child window while the parent window remains open, you can use the `SnapExt` trait:
+**Multi-window applications** are supported. Initialization scripts run globally across all webviews and the Rust backend uses explicit `WebviewWindow` instances, every open window isolates its own tracking loops and native Win32 child bounds.
+If you need to alter or toggle the snap zones in Rust, you can use the `SnapExt` extension trait on any window handle:
 
 ```rust
 use tauri_plugin_snap_layout::SnapExt;
 
-// Detaches the native snap zone from the specified window
-window.snap().detach_snap_zone(&window)?;
+#[tauri::command]
+fn manage_window_overlays(window: tauri::WebviewWindow) -> Result<(), tauri_plugin_snap_layout::Error> {
+    // Remove the native Win32 child overlay on this window and stop tracking.
+    window.snap().detach(&window)?;
+
+    // Recreate overlay and resume tracking.
+    window.snap().attach(&window)?;
+    
+    Ok(())
+}
 ```
+
+<br></br>
 
 ## Troubleshooting
 
-If you see `__SNAP_BUTTON_ID__ is not defined` in the console, add the
+If you see something along these lines `__SNAP_BUTTON_ID__ is not defined` in the console, add the
 following to your `vite.config.ts` to prevent Vite from caching the plugin:
 
 ```typescript
@@ -180,9 +216,13 @@ export default defineConfig({
 });
 ```
 
+<br></br>
+
 ## How it works
 
 The plugin creates an invisible native Win32 child `HWND` positioned over your button. This child window returns `HTMAXBUTTON` from `WM_NCHITTEST`, which is the correct native path for triggering Windows 11's Snap Layout popup on frameless and borderless windows — no keyboard simulation or input injection.
+
+<br></br>
 
 ## Credits
 
@@ -190,6 +230,8 @@ Inspired by and originally derived from:
 
 - [tauri-plugin-frame](https://github.com/clarifei/tauri-plugin-frame) by clarifei
 - [tauri-plugin-decorum](https://github.com/clearlysid/tauri-plugin-decorum) by Siddharth
+
+<br></br>
 
 ## License
 

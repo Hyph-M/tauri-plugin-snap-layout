@@ -1,6 +1,13 @@
 #[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
+async fn create_window(app: tauri::AppHandle) {
+    let webview_window = tauri::WebviewWindowBuilder::new(
+        &app,
+        "secondary",
+        tauri::WebviewUrl::App("index.html".into()),
+    )
+    .decorations(false)
+    .build()
+    .unwrap();
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -14,7 +21,7 @@ pub fn run() {
                 .display(true)
                 .build(),
         )
-        .invoke_handler(tauri::generate_handler![greet])
+        .invoke_handler(tauri::generate_handler![create_window])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

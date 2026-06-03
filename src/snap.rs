@@ -139,8 +139,7 @@ pub fn update_snap_bounds<R: tauri::Runtime>(
                     parent_hwnd: p_hwnd,
                     cursor,
                     emit: Arc::new(move |evt| {
-                        // FIXED: Emits ONLY to this specific window's frontend
-                        let _ = window_clone.emit(evt, ());
+                        let _ = window_clone.emit_to(window_clone.label(), evt, ());
                     }),
                 });
 
@@ -157,6 +156,13 @@ pub fn update_snap_bounds<R: tauri::Runtime>(
     })?;
 
     Ok(())
+}
+
+#[tauri::command]
+pub fn detach_snap_bounds<R: tauri::Runtime>(
+    webview_window: WebviewWindow<R>,
+) -> crate::Result<()> {
+    uninstall(&webview_window)
 }
 
 pub fn uninstall<R: tauri::Runtime>(window: &WebviewWindow<R>) -> crate::Result<()> {
@@ -185,6 +191,7 @@ fn window_hwnd(window: &impl HasWindowHandle) -> crate::Result<HWND> {
 }
 
 fn scaled(value: i32, dpi: u32) -> i32 {
+    // +48 = half of 96 for correct rounding
     let sign = if value < 0 { -1i64 } else { 1i64 };
     (sign * (value.unsigned_abs() as i64 * dpi as i64 + 48) / 96) as i32
 }

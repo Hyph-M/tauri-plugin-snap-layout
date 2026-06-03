@@ -30,19 +30,14 @@ pub struct AreaBuilder {
     config: SnapConfig,
 }
 
-#[allow(clippy::too_many_arguments)]
-#[tauri::command]
-fn fallback_update_snap_bounds(
-    _x: i32,
-    _y: i32,
-    _width: i32,
-    _height: i32,
-    _padding_left: i32,
-    _padding_right: i32,
-    _padding_top: i32,
-    _padding_buttom: i32,
-    _padding_all: i32,
-) {
+#[tauri::command(rename_all = "snake_case", name = "update_snap_bounds")]
+fn fallback_update_snap_bounds(_x: i32, _y: i32, _width: i32, _height: i32) {}
+
+#[tauri::command(rename_all = "snake_case", name = "detach_snap_bounds")]
+fn fallback_detach_snap_bounds() {}
+
+fn escape_js_string(s: &str) -> String {
+    s.replace('\\', "\\\\").replace('"', "\\\"")
 }
 
 impl AreaBuilder {
@@ -115,7 +110,10 @@ impl AreaBuilder {
                     app.manage(Snap::new(app.clone()));
                     Ok(())
                 })
-                .invoke_handler(tauri::generate_handler![fallback_update_snap_bounds])
+                .invoke_handler(tauri::generate_handler![
+                    fallback_update_snap_bounds,
+                    fallback_detach_snap_bounds
+                ])
                 .build();
         }
 
@@ -124,12 +122,12 @@ impl AreaBuilder {
         let injection_script = base_script
             .replace(
                 "__SNAP_BUTTON_ID__",
-                &format!("\"{}\"", self.config.button_id),
+                &format!("\"{}\"", escape_js_string(&self.config.button_id)),
             )
             .replace("__SNAP_DISPLAY__", &self.config.display.to_string())
             .replace(
                 "__SNAP_DEBUG_COLOR__",
-                &format!("\"{}\"", self.config.debug_color),
+                &format!("\"{}\"", escape_js_string(&self.config.debug_color)),
             )
             .replace(
                 "__SNAP_PADDING_LEFT__",
@@ -160,7 +158,10 @@ impl AreaBuilder {
                 app.manage(plugin_config);
                 Ok(())
             })
-            .invoke_handler(tauri::generate_handler![snap::update_snap_bounds])
+            .invoke_handler(tauri::generate_handler![
+                snap::update_snap_bounds,
+                snap::detach_snap_bounds
+            ])
             .js_init_script(injection_script)
             .build()
     }

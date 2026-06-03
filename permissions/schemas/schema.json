@@ -295,6 +295,18 @@
       "type": "string",
       "oneOf": [
         {
+          "description": "Enables the detach_snap_bounds command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-detach-snap-bounds",
+          "markdownDescription": "Enables the detach_snap_bounds command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the detach_snap_bounds command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-detach-snap-bounds",
+          "markdownDescription": "Denies the detach_snap_bounds command without any pre-configured scope."
+        },
+        {
           "description": "Enables the update_snap_bounds command without any pre-configured scope.",
           "type": "string",
           "const": "allow-update-snap-bounds",
@@ -307,16 +319,22 @@
           "markdownDescription": "Denies the update_snap_bounds command without any pre-configured scope."
         },
         {
-          "description": "Default permissions for the snap-layout plugin\n#### This default permission set includes:\n\n- `allow-update-snap-bounds`",
+          "description": "Default permissions for the snap-layout plugin\n#### This default permission set includes:\n\n- `allow-update-snap-bounds`\n- `allow-detach-snap-bounds`",
           "type": "string",
           "const": "default",
-          "markdownDescription": "Default permissions for the snap-layout plugin\n#### This default permission set includes:\n\n- `allow-update-snap-bounds`"
+          "markdownDescription": "Default permissions for the snap-layout plugin\n#### This default permission set includes:\n\n- `allow-update-snap-bounds`\n- `allow-detach-snap-bounds`"
         },
         {
           "description": "Allows the frontend to update window snapping hitboxes",
           "type": "string",
           "const": "allow-update-snap-bounds",
           "markdownDescription": "Allows the frontend to update window snapping hitboxes"
+        },
+        {
+          "description": "Allows the frontend to detach window snapping hitboxes",
+          "type": "string",
+          "const": "allow-detach-snap-bounds",
+          "markdownDescription": "Allows the frontend to detach window snapping hitboxes"
         }
       ]
     }

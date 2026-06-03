@@ -1,5 +1,6 @@
 import { invoke } from '@tauri-apps/api/core';
-import { listen, UnlistenFn } from '@tauri-apps/api/event';
+import { UnlistenFn } from '@tauri-apps/api/event';
+import { getCurrentWindow } from '@tauri-apps/api/window';
 
 declare const __SNAP_BUTTON_ID__: string; 
 declare const __SNAP_DISPLAY__: boolean;
@@ -23,6 +24,9 @@ let activeTarget: HTMLElement | null = null;
 let debugEl: HTMLDivElement | null = null;
 let injectedStyleEl: HTMLStyleElement | null = null;
 
+let isAttached = true;
+let unlistenAttach: UnlistenFn | null = null;
+let unlistenDetach: UnlistenFn | null = null;
 let unlistenEnter: UnlistenFn | null = null;
 let unlistenLeave: UnlistenFn | null = null;
 
@@ -51,7 +55,7 @@ function automateHoverCSS(targetId: string) {
 
       for (const rule of Array.from(sheet.cssRules)) {
         if (rule instanceof CSSStyleRule && rule.selectorText.includes(':hover')) {
-          if (rule.selectorText.includes(targetSelector) || rule.selectorText.includes('button')) {
+          if (rule.selectorText.includes(targetSelector)) {
             const newSelector = rule.selectorText.replace(/:hover/g, '.is-hovered');
             automatedRules += `${newSelector} { ${rule.style.cssText} }\n`;
           }
@@ -144,7 +148,7 @@ const bindTarget = (target: HTMLElement) => {
   syncBounds();
 };
 
-function changeSnapTarget(newButtonId: string): void {
+function changeTarget(newButtonId: string): void {
   if (!newButtonId || currentButtonId === newButtonId) return;
   
   console.log(`[Snap Plugin] Swapping active tracking target ID from #${currentButtonId} to #${newButtonId}`);
@@ -179,8 +183,18 @@ async function initSnapLayout(): Promise<void> {
   if ((window as any).__snapLayoutInit) return;
   (window as any).__snapLayoutInit = true;
 
-  (window as any).changeSnapTarget = changeSnapTarget;
+  (window as any).__SNAP_LAYOUT_CHANGE_TARGET__ = changeTarget;
+  (window as any).__SNAP_LAYOUT_CHANGE_PADDING__ = changePadding;
+  (window as any).__SNAP_LAYOUT_ATTACH__ = attach;
+  (window as any).__SNAP_LAYOUT_DETACH__ = detach;
+  (window as any).__SNAP_LAYOUT_IS_ATTACHED__ = () => isAttached;
+
+  // Clean Public Global API for Vanilla JS / Global Contexts
+  (window as any).changeTarget = changeTarget;
   (window as any).changePadding = changePadding;
+  (window as any).attach = attach;
+  (window as any).detach = detach;
+  (window as any).isAttached = () => isAttached;
 
   const debugEnabled = __SNAP_DISPLAY__;
   const debugColor = __SNAP_DEBUG_COLOR__ || 'rgba(255, 0, 0, 0.4)';
@@ -198,15 +212,48 @@ async function initSnapLayout(): Promise<void> {
     document.body.appendChild(debugEl);
   }
 
-  unlistenEnter = await listen('tauri-snap://snap/mouseenter', () => {
+  async function detach() {
+    if (!isAttached) return;
+    isAttached = false;
+
+    unbindTarget()
+
+    try {
+      await invoke('plugin:snap-layout|detach_snap_bounds');
+    } catch (e) {
+      console.error('[Snap Plugin] failed to detach bounds:', e);
+    }
+  }
+
+  function attach(newTargetId?: string) {
+    isAttached = true;
+
+    if (newTargetId) currentButtonId = newTargetId;
+
+    const target = document.getElementById(currentButtonId);
+    if (target) bindTarget(target);
+  }
+
+  const appWindow = getCurrentWindow();
+
+  unlistenEnter = await appWindow.listen('tauri-snap://snap/mouseenter', () => {
     if (activeTarget) activeTarget.classList.add('is-hovered');
   });
 
-  unlistenLeave = await listen('tauri-snap://snap/mouseleave', () => {
+  unlistenLeave = await appWindow.listen('tauri-snap://snap/mouseleave', () => {
     if (activeTarget) activeTarget.classList.remove('is-hovered');
   });
 
+  unlistenAttach = await appWindow.listen('tauri-snap://frontend-attach', () => {
+    attach();
+  });
+  
+  unlistenDetach = await appWindow.listen('tauri-snap://frontend-detach', () => {
+    detach();
+  });
+
   mutationObserver = new MutationObserver(() => {
+    if (!isAttached) return;
     if (activeTarget && document.contains(activeTarget)) return;
 
     const target = document.getElementById(currentButtonId);
@@ -233,6 +280,8 @@ async function initSnapLayout(): Promise<void> {
     if (debugEl) debugEl.remove();
     if (unlistenEnter) unlistenEnter();
     if (unlistenLeave) unlistenLeave();
+    if (unlistenAttach) unlistenAttach();
+    if (unlistenDetach) unlistenDetach();
   }, { once: true });
 }
 

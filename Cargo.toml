@@ -1,6 +1,6 @@
 [package]
 name = "tauri-plugin-snap-layout"
-version = "1.0.3"
+version = "1.0.4"
 authors = ["Hyph-M", "Siddharth <siddharth99c@gmail.com>", "clarifei" ]
 description = "Snap Layout feature for Windows 11 frameless functionality."
 keywords = ["tauri", "windows", "snap", "plugin", "frameless"]

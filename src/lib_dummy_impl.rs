@@ -5,14 +5,10 @@ use tauri::{
 };
 
 #[tauri::command]
-pub fn update_snap_bounds<R: Runtime>(
-    _webview_window: WebviewWindow<R>,
-    _x: i32,
-    _y: i32,
-    _width: i32,
-    _height: i32,
-) {
-}
+pub fn update_snap_bounds<R: Runtime>(_x: i32, _y: i32, _width: i32, _height: i32) {}
+
+#[tauri::command]
+pub fn detach_snap_bounds<R: Runtime>() {}
 
 pub struct AreaBuilder;
 
@@ -55,7 +51,10 @@ impl AreaBuilder {
                 app.manage(Snap::new(app.clone()));
                 Ok(())
             })
-            .invoke_handler(tauri::generate_handler![update_snap_bounds])
+            .invoke_handler(tauri::generate_handler![
+                update_snap_bounds,
+                detach_snap_bounds
+            ])
             .build()
     }
 }

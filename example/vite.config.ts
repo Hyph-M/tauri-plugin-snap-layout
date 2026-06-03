@@ -27,4 +27,7 @@ export default defineConfig(async () => ({
       ignored: ["**/src-tauri/**"],
     },
   },
+  optimizeDeps: {
+    exclude: ["tauri-plugin-snap-layout"], // Keeps the plugin pristine!
+  },
 }));
