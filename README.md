@@ -136,9 +136,13 @@ changePadding( {left: 2, right: 0, top: 0, bottom: 0, all:3} );
 
 The options available are left, right, top, bottom, all.
 
+#### Note for Framework Users (Svelte/React/Vue/etc.):
+
+If you are using a bundler (Vite, Webpack, etc.), always use the module imports (import { ... } from "tauri-plugin-snap-layout") shown above. The window.snapLayout global is intended strictly for plain HTML/JS setups and may be unavailable during component initialization in modular frameworks.
+
 ### Vanilla JavaScript Usage (Global Namespace)
 
-If you are not using a module bundler, the plugin cleanly exposes its API under the single global `window.snapLayout` object. 
+For simple projects without a build step, the plugin provides an optional global API via `window.snapLayout`. For all production applications using a framework, please use the module imports instead.
 
 Because this plugin targets native Windows 11 functionality, `window.snapLayout` will be `undefined` on unsupported operating systems (like macOS or Linux). To ensure your application remains safely cross-platform without throwing runtime errors, **always use optional chaining (`?.`)** when invoking the plugin:
 
@@ -215,6 +219,16 @@ fn manage_window_overlays(window: tauri::WebviewWindow) -> Result<(), tauri_plug
 <br></br>
 
 ## Troubleshooting
+
+**Why is window.snapLayout undefined?**
+
+Answer: You are likely using a bundler. Use import { attach } from "..." instead. If you are on macOS/Linux, the plugin is not supported and the object will remain undefined.
+
+**How do I use this in Svelte/React?**
+
+Answer: Always use the import syntax. Do not rely on window.snapLayout.
+
+**What are other potential issues?**
 
 If you see something along these lines `__SNAP_BUTTON_ID__ is not defined` in the console, add the
 following to your `vite.config.ts` to prevent Vite from caching the plugin:
