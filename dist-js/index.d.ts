@@ -1,3 +1,4 @@
+import "./global-types";
 export declare function changeTarget(newButtonId: string): void;
 export declare function changePadding(options: {
     left?: number;

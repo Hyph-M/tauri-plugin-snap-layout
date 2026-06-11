@@ -21,16 +21,17 @@ window.addEventListener("DOMContentLoaded", () => {
         // Tell the plugin to stop looking for #maximize and start looking for #minimize
         changeTarget("minimize");
         // Change the amount of padding for the button
-        changePadding({bottom: 10});
-
+        changePadding({ bottom: 10 });
+        window.snapLayout?.changePadding({ left: 10 })
         
         switchButton.textContent = "Target Maximize";
         logMsg.textContent = "Plugin target changed! Cloned CSS generated. Hover over 'Min' button to test.";
         targetingMinimize = true;
       } else {
-        // Return back to tracking #snap-btn (the maximize) and 0 the bottom padding.
+        // Return back to tracking #snap-btn (the maximize) and 0 the bottom and left padding.
         changeTarget("snap-btn");
-        changePadding({bottom: 0});
+        changePadding({ bottom: 0 });
+        window.snapLayout?.changePadding({left: 0})
         
         switchButton.textContent = "Target Minimize";
         logMsg.textContent = "Plugin target restored to original Maximize button.";

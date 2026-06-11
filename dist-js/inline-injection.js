@@ -2862,11 +2862,7 @@
         window.__SNAP_LAYOUT_DETACH__ = detach;
         window.__SNAP_LAYOUT_IS_ATTACHED__ = () => isAttached;
         // Clean Public Global API for Vanilla JS / Global Contexts
-        window.changeTarget = changeTarget;
-        window.changePadding = changePadding;
-        window.attach = attach;
-        window.detach = detach;
-        window.isAttached = () => isAttached;
+        window.snapLayout = { attach, detach, changeTarget, changePadding, isAttached };
         const debugEnabled = __SNAP_DISPLAY__;
         const debugColor = __SNAP_DEBUG_COLOR__ || 'rgba(255, 0, 0, 0.4)';
         if (debugEnabled && !debugEl) {

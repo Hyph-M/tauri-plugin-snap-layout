@@ -1,3 +1,5 @@
+import "./global-types";
+
 export function changeTarget(newButtonId: string): void {
   if (typeof window !== 'undefined' && (window as any).__SNAP_LAYOUT_CHANGE_TARGET__) {
     (window as any).__SNAP_LAYOUT_CHANGE_TARGET__(newButtonId);

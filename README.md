@@ -108,7 +108,7 @@ If you're using a bundler and have the package installed:
 ```typescript
 import { changePadding, changeTarget, attach, detach, isAttached } from "tauri-plugin-snap-layout";
 
-// Swap targetted button dynamically
+// Swap targetted button dynamically at runtime
 changeTarget("new-button-id");
 
 // Temporarily remove the Snap Zone by destroying the overlay area.
@@ -117,10 +117,10 @@ await detach();
 // Re-enable the snap area, you can set a new target here as well.
 attach("optional-new-target");
 
-// Change padding
+// Update layout padding offsets dynamically
 changePadding( {} );
 
-// Get attached state
+// Check if the native snap zone layout is currently active
 isAttached();
 ```
 
@@ -136,19 +136,30 @@ changePadding( {left: 2, right: 0, top: 0, bottom: 0, all:3} );
 
 The options available are left, right, top, bottom, all.
 
-If you need to call it from outside a module context (vanilla JS, inline scripts):
+### Vanilla JavaScript Usage (Global Namespace)
 
-```typescript
-window.changeTarget("new-button-id");
-window.changePadding( {} );
-window.detach();
-window.attach();
-window.isAttached();
+If you are not using a module bundler, the plugin cleanly exposes its API under the single global `window.snapLayout` object. 
+
+Because this plugin targets native Windows 11 functionality, `window.snapLayout` will be `undefined` on unsupported operating systems (like macOS or Linux). To ensure your application remains safely cross-platform without throwing runtime errors, **always use optional chaining (`?.`)** when invoking the plugin:
+
+```javascript
+// Swap targetted button dynamically at runtime
+window.snapLayout?.changeTarget("new-button-id");
+
+// Temporarily remove the Snap Zone by destroying the overlay area.
+window.snapLayout?.detach();
+
+// Re-enable the snap area, you can set a new target here as well.
+window.snapLayout?.attach("your-titlebar-maximize-button-id");
+
+// Update layout padding offsets dynamically
+window.snapLayout?.changePadding( {} );
+
+// Check if the native snap zone layout is currently active
+window.snapLayout?.isAttached();
 ```
 
-**Note:** `attach`, `detach`, and `isAttached` are common names that could conflict with other libraries. In complex apps, prefer the namespaced `window.__SNAP_LAYOUT_ATTACH__` variants instead.
-
-The same fields apply to changePadding as above.
+The same fields apply to changePadding as the bundled version above.
 
 ### Optional Configuration
 
