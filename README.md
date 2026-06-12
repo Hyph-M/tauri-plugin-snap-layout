@@ -18,7 +18,6 @@
     </td>
   </tr>
 </table>
-
 <br></br>
 
 ## Platform Support
@@ -28,7 +27,6 @@
 | Windows 11    | ✅          | ✅ Full       | ✅ Native & Frontend   | Full support (build ≥ 22000) |
 | Windows 10    | ❌          | ❌ No-op     | ❌ Safe Fallback       | Plugin loads cleanly; all APIs callable, no effect |
 | macOS / Linux | ❌          | ❌ No-op     | ❌ Safe Fallback       | No-op, compiles cleanly      |
-
 <br></br>
 
 ## Installation
@@ -49,7 +47,6 @@ npm install tauri-plugin-snap-layout
 pnpm add tauri-plugin-snap-layout
 # or your preferred package manager
 ```
-
 <br></br>
 
 ## Usage
@@ -92,6 +89,26 @@ Add this permission to your src-tauri/capabilities/default.json.
 }
 ```
 
+### Optional Initial Configuration
+
+You can customize the bounding area, cursor, and debug mode via the Rust builder:
+
+```rust
+tauri_plugin_snap_layout::init()
+    .button_id("snap-btn")
+    .padding_left(0)
+    .padding_right(0)
+    .padding_top(0)
+    .padding_bottom(0)
+    .padding_all(0)
+    // defaults to SnapCursor::Arrow if undefined
+    .cursor(tauri_plugin_snap_layout::SnapCursor::Hand)
+    // set true to show a debug overlay
+    .display(false)
+    .debug_color("rgba(255, 0, 0, 0.2)")
+    .build()
+```
+<br></br>
 
 ### 2. Frontend — Add the button
 
@@ -136,13 +153,17 @@ changePadding( {left: 2, right: 0, top: 0, bottom: 0, all:3} );
 
 The options available are left, right, top, bottom, all.
 
-#### Note for Framework Users (Svelte/React/Vue/etc.):
+### Dynamically Hiding the Button
+You do not need to manually detach the native overlay if you want to temporarily hide your snap button. If you hide your button using CSS (e.g. `display: none`), the plugin will automatically detect this and shrink the native hit-test zone to 0x0. When you make the button visible again, the native snap layout zone will instantly restore itself.
+
+### Note for Framework Users (Svelte/React/Vue/etc.):
 
 If you are using a bundler (Vite, Webpack, etc.), always use the module imports (import { ... } from "tauri-plugin-snap-layout") shown above. The window.snapLayout global is intended strictly for plain HTML/JS setups and may be unavailable during component initialization in modular frameworks.
+<br></br>
 
 ### Vanilla JavaScript Usage (Global Namespace)
 
-For simple projects without a build step, the plugin provides an optional global API via `window.snapLayout`. For all production applications using a framework, please use the module imports instead.
+For simple projects without a build step, the plugin provides an optional global API via `window.snapLayout`. For all production applications using a framework, use the module imports instead.
 
 Because this plugin targets native Windows 11 functionality, `window.snapLayout` will be `undefined` on unsupported operating systems (like macOS or Linux). To ensure your application remains safely cross-platform without throwing runtime errors, **always use optional chaining (`?.`)** when invoking the plugin:
 
@@ -164,26 +185,7 @@ window.snapLayout?.isAttached();
 ```
 
 The same fields apply to changePadding as the bundled version above.
-
-### Optional Configuration
-
-You can customize the bounding area, cursor, and debug mode via the Rust builder:
-
-```rust
-tauri_plugin_snap_layout::init()
-    .button_id("snap-btn")
-    .padding_left(0)
-    .padding_right(0)
-    .padding_top(0)
-    .padding_bottom(0)
-    .padding_all(0)
-    // defaults to SnapCursor::Arrow if undefined
-    .cursor(tauri_plugin_snap_layout::SnapCursor::Hand)
-    // set true to show a debug overlay
-    .display(false)
-    .debug_color("rgba(255, 0, 0, 0.2)")
-    .build()
-```
+<br></br>
 
 ### CSS Hover State
 
@@ -195,6 +197,7 @@ Because the native overlay intercepts pointer events, `:hover` CSS will not fire
   background: rgba(255, 255, 255, 0.1);
 }
 ```
+<br></br>
 
 ### Programmatic Window Management & Multi-Window Support
 
@@ -215,10 +218,17 @@ fn manage_window_overlays(window: tauri::WebviewWindow) -> Result<(), tauri_plug
     Ok(())
 }
 ```
+<br></br>
 
+### Note on Initial Load Timing
+
+Because this plugin relies on your frontend JavaScript to measure the DOM button and pass its coordinates to the native OS, there is a tiny delay (usually just a few milliseconds) on application startup before the snap zone becomes active.
+
+If you want to prevent this micro-delay entirely before the snap zone is perfectly positioned, you can use the standard Tauri "Hidden Window" pattern: set "visible": false in your tauri.conf.json, and then call appWindow.show() in your frontend code once your UI has mounted.
 <br></br>
 
 ## Troubleshooting
+
 
 **Why is window.snapLayout undefined?**
 
@@ -240,13 +250,11 @@ export default defineConfig({
   },
 });
 ```
-
 <br></br>
 
 ## How it works
 
 The plugin creates an invisible native Win32 child `HWND` positioned over your button. This child window returns `HTMAXBUTTON` from `WM_NCHITTEST`, which is the correct native path for triggering Windows 11's Snap Layout popup on frameless and borderless windows — no keyboard simulation or input injection.
-
 <br></br>
 
 ## Credits
@@ -255,7 +263,6 @@ Inspired by and originally derived from:
 
 - [tauri-plugin-frame](https://github.com/clarifei/tauri-plugin-frame) by clarifei
 - [tauri-plugin-decorum](https://github.com/clearlysid/tauri-plugin-decorum) by Siddharth
-
 <br></br>
 
 ## License

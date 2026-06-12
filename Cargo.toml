@@ -1,8 +1,8 @@
 [package]
 name = "tauri-plugin-snap-layout"
-version = "1.0.5"
+version = "1.0.6"
 authors = ["Hyph-M", "Siddharth <siddharth99c@gmail.com>", "clarifei" ]
-description = "Snap Layout feature for Windows 11 frameless functionality."
+description = "Enables native Windows 11 Snap Layouts for Tauri v2 frameless windows by injecting a transparent Win32 hit-test overlay."
 keywords = ["tauri", "windows", "snap", "plugin", "frameless"]
 categories = ["gui"]
 readme = "README.md"
@@ -27,3 +27,6 @@ windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_Graphic
 
 [build-dependencies]
 tauri-plugin = { version = "2", features = ["build"] }
+
+[package.metadata.docs.rs]
+targets = ["x86_64-pc-windows-msvc"]

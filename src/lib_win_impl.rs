@@ -36,10 +36,6 @@ fn fallback_update_snap_bounds(_x: i32, _y: i32, _width: i32, _height: i32) {}
 #[tauri::command(rename_all = "snake_case", name = "detach_snap_bounds")]
 fn fallback_detach_snap_bounds() {}
 
-fn escape_js_string(s: &str) -> String {
-    s.replace('\\', "\\\\").replace('"', "\\\"")
-}
-
 impl AreaBuilder {
     pub fn new() -> Self {
         Self {
@@ -122,12 +118,14 @@ impl AreaBuilder {
         let injection_script = base_script
             .replace(
                 "__SNAP_BUTTON_ID__",
-                &format!("\"{}\"", escape_js_string(&self.config.button_id)),
+                &serde_json::to_string(&self.config.button_id)
+                    .unwrap_or_else(|_| "\"\"".to_string()),
             )
             .replace("__SNAP_DISPLAY__", &self.config.display.to_string())
             .replace(
                 "__SNAP_DEBUG_COLOR__",
-                &format!("\"{}\"", escape_js_string(&self.config.debug_color)),
+                &serde_json::to_string(&self.config.debug_color)
+                    .unwrap_or_else(|_| "\"\"".to_string()),
             )
             .replace(
                 "__SNAP_PADDING_LEFT__",

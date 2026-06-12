@@ -18,6 +18,8 @@ pub use platform::SnapCursor;
 mod platform;
 
 #[cfg(not(windows))]
+/// Note: This is a no-op implementation for non-Windows platforms.
+/// This enum is provided to ensure your cross-platform code compiles.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum SnapCursor {
     Arrow,
