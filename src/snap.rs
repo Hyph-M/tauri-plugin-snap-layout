@@ -174,8 +174,8 @@ pub fn uninstall<R: tauri::Runtime>(window: &WebviewWindow<R>) -> crate::Result<
         let child_hwnd = RemovePropW(p_hwnd, CHILD_PROP.as_ptr()) as HWND;
         if !child_hwnd.is_null() {
             DestroyWindow(child_hwnd);
+            let _ = window_clone.emit(EVENT_LEAVE, ());
         }
-        let _ = window_clone.emit(EVENT_LEAVE, ());
     })?;
     Ok(())
 }

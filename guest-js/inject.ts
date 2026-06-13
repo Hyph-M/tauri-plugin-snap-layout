@@ -270,7 +270,7 @@ async function initSnapLayout(): Promise<void> {
   const initialTarget = document.getElementById(currentButtonId);
   if (initialTarget) bindTarget(initialTarget);
 
-  window.addEventListener('unload', () => {
+  window.addEventListener('pagehide', () => {
     if (mutationObserver) mutationObserver.disconnect();
     unbindTarget();
     if (debugEl) debugEl.remove();
