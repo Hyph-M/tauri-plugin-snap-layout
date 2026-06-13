@@ -2922,8 +2922,15 @@
         headObserver = new MutationObserver((mutations) => {
             if (!activeTarget)
                 return;
-            const hasNewStyles = mutations.some(m => Array.from(m.addedNodes).some(n => n instanceof HTMLStyleElement || n instanceof HTMLLinkElement));
-            if (hasNewStyles) {
+            const hasExternalStyles = mutations.some(m => Array.from(m.addedNodes).some(n => {
+                if (!(n instanceof HTMLStyleElement || n instanceof HTMLLinkElement))
+                    return false;
+                // Ignore the style element we injected ourselves
+                if (n instanceof HTMLStyleElement && n.id.startsWith('snap-automated-css-'))
+                    return false;
+                return true;
+            }));
+            if (hasExternalStyles) {
                 delete cachedHoverRules[currentButtonId];
                 automateHoverCSS(currentButtonId);
             }
@@ -2951,7 +2958,9 @@
         const initialTarget = document.getElementById(currentButtonId);
         if (initialTarget)
             bindTarget(initialTarget);
-        window.addEventListener('pagehide', () => {
+        window.addEventListener('pagehide', (event) => {
+            if (event.persisted)
+                return;
             if (mutationObserver)
                 mutationObserver.disconnect();
             if (headObserver)
