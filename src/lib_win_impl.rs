@@ -100,7 +100,7 @@ impl AreaBuilder {
 
     pub fn build<R: Runtime>(self) -> TauriPlugin<R> {
         let version = windows_version::OsVersion::current();
-        if version.build < 22000 {
+        if version.build < crate::desktop::WIN11_MIN_BUILD {
             return Builder::new("snap-layout")
                 .setup(|app, _| {
                     app.manage(Snap::new(app.clone()));

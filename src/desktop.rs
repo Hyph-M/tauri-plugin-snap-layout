@@ -1,5 +1,8 @@
 use tauri::{Emitter, Runtime, WebviewWindow};
 
+/// Minimum Windows build number required for Snap Layouts support (Windows 11 21H2).
+pub(crate) const WIN11_MIN_BUILD: u32 = 22000;
+
 pub struct Snap<R: Runtime> {
     app: tauri::AppHandle<R>,
 }
@@ -17,7 +20,7 @@ impl<R: Runtime> Snap<R> {
         #[cfg(windows)]
         {
             let version = windows_version::OsVersion::current();
-            if version.build >= 22000 {
+            if version.build >= WIN11_MIN_BUILD {
                 window.emit("tauri-snap://frontend-attach", ())?;
             }
         }
@@ -28,7 +31,7 @@ impl<R: Runtime> Snap<R> {
         #[cfg(windows)]
         {
             let version = windows_version::OsVersion::current();
-            if version.build >= 22000 {
+            if version.build >= WIN11_MIN_BUILD {
                 window.emit("tauri-snap://frontend-detach", ())?;
                 return crate::platform::snap::uninstall(window);
             }
