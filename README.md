@@ -197,6 +197,40 @@ Because the native overlay intercepts pointer events, `:hover` CSS will not fire
   background: rgba(255, 255, 255, 0.1);
 }
 ```
+
+**Tailwind CSS**
+
+Tailwind doesn't generate `:hover` rules in stylesheets, so the automatic mirroring has nothing to pick up. Define a custom variant instead:
+
+```js
+// tailwind.config.js
+const plugin = require('tailwindcss/plugin');
+module.exports = {
+  plugins: [
+    plugin(({ addVariant }) => {
+      addVariant('snap-hover', '&.is-hovered');
+    }),
+  ],
+};
+```
+
+Then apply it on your button:
+
+```html
+<button id="snap-btn" class="snap-hover:bg-white/10 snap-hover:scale-110 ...">
+```
+
+> Tailwind integrations have not been tested exhaustively. If you run into issues, please open an issue on GitHub.
+
+**CSS-in-JS (Emotion, styled-components)**
+
+Styles injected after component mount are handled automatically. The plugin watches for late-injected stylesheets and re-scans when they appear, so no extra configuration is needed.
+
+> CSS-in-JS integrations have not been tested exhaustively. If you run into issues, please open an issue on GitHub.
+
+**Shadow DOM**
+
+Elements inside a shadow root are not supported for `.is-hovered` CSS automation. The Win32 hit-test overlay will still track position correctly, but hover styles must be applied manually via the Tauri events `tauri-snap://snap/mouseenter` and `tauri-snap://snap/mouseleave` if needed.
 <br></br>
 
 ### Programmatic Window Management & Multi-Window Support
@@ -209,6 +243,9 @@ use tauri_plugin_snap_layout::SnapExt;
 
 #[tauri::command]
 fn manage_window_overlays(window: tauri::WebviewWindow) -> Result<(), tauri_plugin_snap_layout::Error> {
+    // snap() retrieves the plugin state;
+    // the window is passed separately as the target
+
     // Remove the native Win32 child overlay on this window and stop tracking.
     window.snap().detach(&window)?;
 

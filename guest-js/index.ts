@@ -3,6 +3,8 @@ import "./global-types";
 export function changeTarget(newButtonId: string): void {
   if (typeof window !== 'undefined' && (window as any).__SNAP_LAYOUT_CHANGE_TARGET__) {
     (window as any).__SNAP_LAYOUT_CHANGE_TARGET__(newButtonId);
+  } else if (typeof window !== 'undefined') {
+    console.warn('[Snap Plugin] changeTarget called before plugin initialization or on unsupported platform.');
   }
 }
 
@@ -15,6 +17,8 @@ export function changePadding(options: {
 }): void {
   if (typeof window !== 'undefined' && (window as any).__SNAP_LAYOUT_CHANGE_PADDING__) {
     (window as any).__SNAP_LAYOUT_CHANGE_PADDING__(options);
+  } else if (typeof window !== 'undefined') {
+    console.warn('[Snap Plugin] changeTarget called before plugin initialization or on unsupported platform.');
   }
 }
 

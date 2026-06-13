@@ -1,14 +1,14 @@
 use crate::desktop::Snap;
 use tauri::{
     plugin::{Builder, TauriPlugin},
-    Manager, Runtime, WebviewWindow,
+    Manager, Runtime,
 };
 
 #[tauri::command]
-pub fn update_snap_bounds<R: Runtime>(_x: i32, _y: i32, _width: i32, _height: i32) {}
+pub fn update_snap_bounds(_x: i32, _y: i32, _width: i32, _height: i32) {}
 
 #[tauri::command]
-pub fn detach_snap_bounds<R: Runtime>() {}
+pub fn detach_snap_bounds() {}
 
 pub struct AreaBuilder;
 

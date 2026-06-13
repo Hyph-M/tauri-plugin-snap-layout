@@ -7,7 +7,7 @@ use windows_sys::Win32::{
     UI::{
         HiDpi::GetDpiForWindow,
         Input::KeyboardAndMouse::{TrackMouseEvent, TME_LEAVE, TME_NONCLIENT, TRACKMOUSEEVENT},
-        Shell::{DefSubclassProc, RemoveWindowSubclass, SetWindowSubclass}, // Added RemoveWindowSubclass
+        Shell::{DefSubclassProc, RemoveWindowSubclass, SetWindowSubclass},
         WindowsAndMessaging::{
             CreateWindowExW, DestroyWindow, GetPropW, IsZoomed, LoadCursorW, RemovePropW,
             SendMessageW, SetCursor, SetPropW, SetWindowPos, HTMAXBUTTON, IDC_ARROW, IDC_HAND,
