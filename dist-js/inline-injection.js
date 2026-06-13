@@ -2703,6 +2703,7 @@
     let paddingTop = __SNAP_PADDING_TOP__;
     let paddingBottom = __SNAP_PADDING_BOTTOM__;
     let paddingAll = __SNAP_PADDING_ALL__;
+    let headObserver = null;
     let mutationObserver = null;
     let resizeObserver = null;
     let rafId = null;
@@ -2714,7 +2715,11 @@
     let unlistenDetach = null;
     let unlistenEnter = null;
     let unlistenLeave = null;
+    // Per-ID cache of generated .is-hovered rules. Invalidated by headObserver when new
+    // stylesheets are injected. Not invalidated on changeTarget — the headObserver handles
+    // that if stylesheets changed in the interim.
     const cachedHoverRules = {};
+    // CSS framework compatibility: see README's CSS Hover State
     function automateHoverCSS(targetId) {
         if (injectedStyleEl) {
             injectedStyleEl.remove();
@@ -2912,6 +2917,18 @@
         unlistenDetach = await appWindow.listen('tauri-snap://frontend-detach', () => {
             detach();
         });
+        // Handles CSS-in-JS libraries (Emotion, styled-components) that inject <style> tags
+        // into <head> after initial bind, which automateHoverCSS would otherwise miss.
+        headObserver = new MutationObserver((mutations) => {
+            if (!activeTarget)
+                return;
+            const hasNewStyles = mutations.some(m => Array.from(m.addedNodes).some(n => n instanceof HTMLStyleElement || n instanceof HTMLLinkElement));
+            if (hasNewStyles) {
+                delete cachedHoverRules[currentButtonId];
+                automateHoverCSS(currentButtonId);
+            }
+        });
+        headObserver.observe(document.head, { childList: true });
         mutationObserver = new MutationObserver(() => {
             if (!isAttached)
                 return;
@@ -2934,9 +2951,11 @@
         const initialTarget = document.getElementById(currentButtonId);
         if (initialTarget)
             bindTarget(initialTarget);
-        window.addEventListener('unload', () => {
+        window.addEventListener('pagehide', () => {
             if (mutationObserver)
                 mutationObserver.disconnect();
+            if (headObserver)
+                headObserver.disconnect();
             unbindTarget();
             if (debugEl)
                 debugEl.remove();

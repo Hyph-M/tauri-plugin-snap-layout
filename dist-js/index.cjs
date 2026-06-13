@@ -4,10 +4,16 @@ function changeTarget(newButtonId) {
     if (typeof window !== 'undefined' && window.__SNAP_LAYOUT_CHANGE_TARGET__) {
         window.__SNAP_LAYOUT_CHANGE_TARGET__(newButtonId);
     }
+    else if (typeof window !== 'undefined') {
+        console.warn('[Snap Plugin] changeTarget called before plugin initialization or on unsupported platform.');
+    }
 }
 function changePadding(options) {
     if (typeof window !== 'undefined' && window.__SNAP_LAYOUT_CHANGE_PADDING__) {
         window.__SNAP_LAYOUT_CHANGE_PADDING__(options);
+    }
+    else if (typeof window !== 'undefined') {
+        console.warn('[Snap Plugin] changeTarget called before plugin initialization or on unsupported platform.');
     }
 }
 function attach(newTargetId) {
