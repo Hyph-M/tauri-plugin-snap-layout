@@ -118,7 +118,7 @@ const syncBounds = () => {
   });
 };
 
-const unbindTarget = () => {
+const unbindTarget = (collapseNative = false) => {
   if (rafId !== null) { 
     cancelAnimationFrame(rafId); 
     rafId = null; 
@@ -135,6 +135,10 @@ const unbindTarget = () => {
   if (injectedStyleEl) {
     injectedStyleEl.remove();
     injectedStyleEl = null;
+  }
+
+  if (collapseNative) {
+    invoke('plugin:snap-layout|detach_snap_bounds').catch(console.error);
   }
 };
 
@@ -280,7 +284,7 @@ async function initSnapLayout(): Promise<void> {
     if (target) {
       bindTarget(target);
     } else {
-      unbindTarget();
+      unbindTarget(true);
     }
   });
 

@@ -2797,7 +2797,7 @@
             rafId = null;
         });
     };
-    const unbindTarget = () => {
+    const unbindTarget = (collapseNative = false) => {
         if (rafId !== null) {
             cancelAnimationFrame(rafId);
             rafId = null;
@@ -2816,6 +2816,9 @@
         if (injectedStyleEl) {
             injectedStyleEl.remove();
             injectedStyleEl = null;
+        }
+        if (collapseNative) {
+            invoke('plugin:snap-layout|detach_snap_bounds').catch(console.error);
         }
     };
     const bindTarget = (target) => {
@@ -2946,7 +2949,7 @@
                 bindTarget(target);
             }
             else {
-                unbindTarget();
+                unbindTarget(true);
             }
         });
         mutationObserver.observe(document.body || document.documentElement, {
