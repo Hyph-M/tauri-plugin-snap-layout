@@ -27,6 +27,7 @@
 | Windows 11    | ✅          | ✅ Full       | ✅ Native & Frontend   | Full support (build ≥ 22000) |
 | Windows 10    | ❌          | ❌ No-op     | ❌ Safe Fallback       | Plugin loads cleanly; all APIs callable, no effect |
 | macOS / Linux | ❌          | ❌ No-op     | ❌ Safe Fallback       | No-op, compiles cleanly      |
+
 <br></br>
 
 ## Installation
