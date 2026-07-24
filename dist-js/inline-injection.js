@@ -2715,7 +2715,9 @@
     let unlistenDetach = null;
     let unlistenEnter = null;
     let unlistenLeave = null;
-    // Per-ID cache of generated .is-hovered rules. Invalidated by headObserver when new
+    let unlistenDown = null;
+    let unlistenUp = null;
+    // Per-ID cache of generated .is-hovered / .is-active rules. Invalidated by headObserver when new
     // stylesheets are injected. Not invalidated on changeTarget — the headObserver handles
     // that if stylesheets changed in the interim.
     const cachedHoverRules = {};
@@ -2744,9 +2746,9 @@
                     continue;
                 }
                 for (const rule of Array.from(sheet.cssRules)) {
-                    if (rule instanceof CSSStyleRule && rule.selectorText.includes(':hover')) {
+                    if (rule instanceof CSSStyleRule && (rule.selectorText.includes(':hover') || rule.selectorText.includes(':active'))) {
                         if (rule.selectorText.includes(targetSelector)) {
-                            const newSelector = rule.selectorText.replace(/:hover/g, '.is-hovered');
+                            const newSelector = rule.selectorText.replace(/:hover/g, '.is-hovered').replace(/:active/g, '.is-active');
                             automatedRules += `${newSelector} { ${rule.style.cssText} }\n`;
                         }
                     }
@@ -2811,6 +2813,7 @@
             debugEl.style.display = 'none';
         if (activeTarget) {
             activeTarget.classList.remove('is-hovered');
+            activeTarget.classList.remove('is-active');
             activeTarget = null;
         }
         if (injectedStyleEl) {
@@ -2911,8 +2914,18 @@
                 activeTarget.classList.add('is-hovered');
         });
         unlistenLeave = await appWindow.listen('tauri-snap://snap/mouseleave', () => {
-            if (activeTarget)
+            if (activeTarget) {
                 activeTarget.classList.remove('is-hovered');
+                activeTarget.classList.remove('is-active');
+            }
+        });
+        unlistenDown = await appWindow.listen('tauri-snap://snap/mousedown', () => {
+            if (activeTarget)
+                activeTarget.classList.add('is-active');
+        });
+        unlistenUp = await appWindow.listen('tauri-snap://snap/mouseup', () => {
+            if (activeTarget)
+                activeTarget.classList.remove('is-active');
         });
         unlistenAttach = await appWindow.listen('tauri-snap://frontend-attach', () => {
             attach();
