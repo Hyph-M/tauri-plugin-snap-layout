@@ -56,6 +56,8 @@ const STATE_PROP: &[u16] = &[
 const SUBCLASS_ID: usize = 0x7466_736e_6170;
 const EVENT_ENTER: &str = "tauri-snap://snap/mouseenter";
 const EVENT_LEAVE: &str = "tauri-snap://snap/mouseleave";
+const EVENT_DOWN: &str = "tauri-snap://snap/mousedown";
+const EVENT_UP: &str = "tauri-snap://snap/mouseup";
 
 struct SnapState {
     hovering: bool,
@@ -246,12 +248,17 @@ unsafe extern "system" fn child_subclass_proc(
         }
         WM_NCLBUTTONDOWN => {
             if wparam == HTMAXBUTTON as usize {
+                if !state_ptr.is_null() {
+                    let state = &*state_ptr;
+                    (state.emit)(EVENT_DOWN);
+                }
                 return 0;
             }
         }
         WM_NCLBUTTONUP => {
             if wparam == HTMAXBUTTON as usize && !state_ptr.is_null() {
                 let state = &*state_ptr;
+                (state.emit)(EVENT_UP);
                 if IsZoomed(state.parent_hwnd) != 0 {
                     SendMessageW(state.parent_hwnd, WM_SYSCOMMAND, SC_RESTORE as WPARAM, 0);
                 } else {
